@@ -1,0 +1,187 @@
+<div id="cyber-city">
+    <canvas id="city-canvas"></canvas>
+    <div class="city-vignette"></div>
+    <div class="city-scanlines"></div>
+</div>
+
+<style>
+    #cyber-city {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        overflow: hidden;
+        pointer-events: none;
+        background:
+            radial-gradient(ellipse at 50% 65%, #24104a 0%, transparent 55%),
+            linear-gradient(#08091c, #100b26 60%, #03040c);
+    }
+
+    #city-canvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+    }
+
+    .city-vignette {
+        position: absolute;
+        inset: 0;
+        background:
+            linear-gradient(90deg, rgba(3, 4, 15, .65), transparent 45%, rgba(3, 4, 15, .5)),
+            linear-gradient(0deg, rgba(3, 4, 15, .8), transparent 70%);
+    }
+
+    .city-scanlines {
+        position: absolute;
+        inset: 0;
+        opacity: .12;
+        background: repeating-linear-gradient(0deg,
+                transparent 0px,
+                transparent 3px,
+                rgba(0, 245, 255, .15) 4px);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        #cyber-city {
+            display: none;
+        }
+    }
+</style>
+
+<script>
+    (() => {
+        const canvas = document.getElementById("city-canvas");
+        if (!canvas) return;
+
+        const ctx = canvas.getContext("2d");
+        let w, h, buildings = [], rain = [], particles = [];
+        let animationId;
+
+        function resize() {
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            w = window.innerWidth;
+            h = window.innerHeight;
+            canvas.width = w * dpr;
+            canvas.height = h * dpr;
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+            buildings = [];
+            let x = -10;
+
+            while (x < w + 50) {
+                const bw = 35 + Math.random() * 75;
+                const bh = h * (.18 + Math.random() * .42);
+
+                buildings.push({
+                    x, w: bw, h: bh,
+                    color: Math.random() > .5 ? "#07152c" : "#130c30",
+                    lights: Array.from({ length: 18 }, () => ({
+                        x: Math.random(),
+                        y: Math.random(),
+                        color: Math.random() > .5 ? "#00eaff" : "#ff2bd6",
+                        phase: Math.random() * 6
+                    }))
+                });
+
+                x += bw + 5;
+            }
+
+            rain = Array.from({ length: Math.floor(w / 5) }, () => ({
+                x: Math.random() * w,
+                y: Math.random() * h,
+                speed: 5 + Math.random() * 9,
+                length: 8 + Math.random() * 20
+            }));
+
+            particles = Array.from({ length: 65 }, () => ({
+                x: Math.random() * w,
+                y: Math.random() * h,
+                size: Math.random() * 2 + .5,
+                speed: .2 + Math.random() * .8
+            }));
+        }
+
+        function drawBuildings(time) {
+            buildings.forEach(b => {
+                const top = h - b.h;
+
+                ctx.fillStyle = b.color;
+                ctx.fillRect(b.x, top, b.w, b.h);
+
+                ctx.strokeStyle = "rgba(0,245,255,.2)";
+                ctx.strokeRect(b.x, top, b.w, b.h);
+
+                b.lights.forEach(light => {
+                    const glow = .3 + Math.sin(time * .001 + light.phase) * .25;
+                    ctx.globalAlpha = Math.max(.1, glow);
+                    ctx.fillStyle = light.color;
+                    ctx.shadowBlur = 9;
+                    ctx.shadowColor = light.color;
+
+                    ctx.fillRect(
+                        b.x + light.x * b.w,
+                        top + light.y * b.h,
+                        3,
+                        5
+                    );
+                });
+
+                ctx.globalAlpha = 1;
+                ctx.shadowBlur = 0;
+            });
+        }
+
+        function drawRain() {
+            ctx.strokeStyle = "rgba(100,210,255,.35)";
+            ctx.lineWidth = 1;
+
+            rain.forEach(drop => {
+                ctx.beginPath();
+                ctx.moveTo(drop.x, drop.y);
+                ctx.lineTo(drop.x - 3, drop.y + drop.length);
+                ctx.stroke();
+
+                drop.y += drop.speed;
+                drop.x -= 1;
+
+                if (drop.y > h) {
+                    drop.y = -20;
+                    drop.x = Math.random() * w;
+                }
+            });
+        }
+
+        function drawParticles() {
+            particles.forEach(p => {
+                ctx.fillStyle = "rgba(0,245,255,.7)";
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = "#00eaff";
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+
+                p.y -= p.speed;
+
+                if (p.y < 0) {
+                    p.y = h;
+                    p.x = Math.random() * w;
+                }
+            });
+
+            ctx.shadowBlur = 0;
+        }
+
+        function animate(time) {
+            ctx.clearRect(0, 0, w, h);
+
+            drawBuildings(time);
+            drawParticles();
+            drawRain();
+
+            animationId = requestAnimationFrame(animate);
+        }
+
+        window.addEventListener("resize", resize);
+        resize();
+        animate(0);
+    })();
+</script>

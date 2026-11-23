@@ -1,0 +1,67 @@
+{
+    "accuracy": 91.65,
+    "train_samples": 8000,
+    "test_samples": 2000,
+    "dataset_size": 10000,
+    "feature_count": 11,
+    "class_distribution": {
+        "Strong": 6319,
+        "Medium": 3356,
+        "Weak": 325
+    },
+    "labels": [
+        "Weak",
+        "Medium",
+        "Strong"
+    ],
+    "confusion_matrix": [
+        [
+            64,
+            1,
+            0
+        ],
+        [
+            1,
+            531,
+            139
+        ],
+        [
+            0,
+            26,
+            1238
+        ]
+    ],
+    "classification_report": {
+        "Medium": {
+            "precision": 0.9516129032258065,
+            "recall": 0.7913561847988078,
+            "f1-score": 0.8641171684296176,
+            "support": 671.0
+        },
+        "Strong": {
+            "precision": 0.8990559186637618,
+            "recall": 0.9794303797468354,
+            "f1-score": 0.9375236652783037,
+            "support": 1264.0
+        },
+        "Weak": {
+            "precision": 0.9846153846153847,
+            "recall": 0.9846153846153847,
+            "f1-score": 0.9846153846153847,
+            "support": 65.0
+        },
+        "accuracy": 0.9165,
+        "macro avg": {
+            "precision": 0.9450947355016509,
+            "recall": 0.9184673163870093,
+            "f1-score": 0.9287520727744353,
+            "support": 2000.0
+        },
+        "weighted avg": {
+            "precision": 0.9194694696277557,
+            "recall": 0.9165,
+            "f1-score": 0.9144262664640246,
+            "support": 2000.0
+        }
+    }
+}
